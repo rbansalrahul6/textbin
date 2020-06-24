@@ -8,12 +8,14 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/rbansalrahul6/textbin/pkg/models/mysql"
 )
 
 // add app dependencies here
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
+	snippets *mysql.SnippetModel
 }
 
 func main() {
@@ -38,6 +40,7 @@ func main() {
 	app := &application{
 		infoLog:  infoLog,
 		errorLog: errLog,
+		snippets: &mysql.SnippetModel{DB: db},
 	}
 
 	// start and listen to server
