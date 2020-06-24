@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime/debug"
+	"time"
 )
 
 // method to handle server errors
@@ -35,10 +36,18 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, name stri
 	// use buffer for trial rendering
 	buf := new(bytes.Buffer)
 	// execute template
-	err := ts.Execute(buf, td)
+	err := ts.Execute(buf, app.addDefaultData(td, r))
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 	buf.WriteTo(w)
+}
+
+func (app *application) addDefaultData(td *templateData, r *http.Request) *templateData {
+	if td == nil {
+		td = &templateData{}
+	}
+	td.CurrentYear = time.Now().Year()
+	return td
 }
