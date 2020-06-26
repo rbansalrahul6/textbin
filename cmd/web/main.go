@@ -7,8 +7,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golangcollege/sessions"
 	"github.com/rbansalrahul6/textbin/pkg/models/mysql"
 )
 
@@ -16,6 +18,7 @@ import (
 type application struct {
 	errorLog      *log.Logger
 	infoLog       *log.Logger
+	session       *sessions.Session
 	snippets      *mysql.SnippetModel
 	templateCache map[string]*template.Template
 }
@@ -24,6 +27,7 @@ func main() {
 	// command line flags for config
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	dsn := flag.String("dsn", "web:pass@/textbin?parseTime=true", "MySQL database DSN")
+	secret := flag.String("secret", "s6Ndh+pPbnzHbS*+9Pk8qGWhTzbpa@ge", "Secret key")
 	flag.Parse()
 
 	// initialize loggers
@@ -44,10 +48,15 @@ func main() {
 		errLog.Fatal(err)
 	}
 
+	// configure session manager
+	session := sessions.New([]byte(*secret))
+	session.Lifetime = 12 * time.Hour
+
 	// initialize our app dependencies
 	app := &application{
 		infoLog:       infoLog,
 		errorLog:      errLog,
+		session:       session,
 		snippets:      &mysql.SnippetModel{DB: db},
 		templateCache: templateCache,
 	}
